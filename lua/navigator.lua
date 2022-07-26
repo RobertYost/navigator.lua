@@ -5,9 +5,7 @@ local function warn(msg)
 end
 
 local function info(msg)
-  if _NgConfigValues.debug then
-    vim.api.nvim_echo({ { 'Info: ' .. msg } }, true, {})
-  end
+  if _NgConfigValues.debug then vim.api.nvim_echo({ { 'Info: ' .. msg } }, true, {}) end
 end
 
 _NgConfigValues = {
@@ -43,20 +41,20 @@ _NgConfigValues = {
       sign = true,
       sign_priority = 40,
       virtual_text = true,
-      virtual_text_icon = true,
+      virtual_text_icon = true
     },
     code_lens_action = {
       enable = true,
       sign = true,
       sign_priority = 40,
       virtual_text = true,
-      virtual_text_icon = true,
+      virtual_text_icon = true
     },
     diagnostic = {
       underline = true,
       virtual_text = { spacing = 3, source = true }, -- show virtual for diagnostic message
       update_in_insert = false, -- update diagnostic message in insert mode
-      severity_sort = { reverse = true },
+      severity_sort = { reverse = true }
     },
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     format_options = { async = false }, -- async: disable by default, I saw something unexpected
@@ -83,9 +81,9 @@ _NgConfigValues = {
       -- sumneko_binary = sumneko_binary,
       -- cmd = {'lua-language-server'}
     },
-    servers = {}, -- you can add additional lsp server so navigator will load the default for you
+    servers = {} -- you can add additional lsp server so navigator will load the default for you
   },
-  lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
+  mason_lsp = false, -- set to true if you would like use the lsp installed by williamboman/mason.nvim
   icons = {
     icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
     -- Code action
@@ -115,7 +113,7 @@ _NgConfigValues = {
       inner_node = '├○',
       outer_node = '╰○',
       bracket_left = '⟪',
-      bracket_right = '⟫',
+      bracket_right = '⟫'
     },
     -- Treesitter
     match_kinds = {
@@ -128,20 +126,16 @@ _NgConfigValues = {
       type = ' ',
       field = '🏈',
       module = '📦',
-      flag = '🎏',
+      flag = '🎏'
     },
     treesitter_defult = '🌲',
-    doc_symbols = '',
-  },
+    doc_symbols = ''
+  }
 }
 
 M.deprecated = function(cfg)
-  if cfg.code_action_prompt then
-    warn('code_action_prompt moved to lsp.code_action')
-  end
-  if cfg.code_lens_action_prompt then
-    warn('code_lens_action_prompt moved to lsp.code_lens_action')
-  end
+  if cfg.code_action_prompt then warn('code_action_prompt moved to lsp.code_action') end
+  if cfg.code_lens_action_prompt then warn('code_lens_action_prompt moved to lsp.code_lens_action') end
 
   if cfg.lsp ~= nil and cfg.lsp.disable_format_ft ~= nil and cfg.lsp.disable_format_ft ~= {} then
     warn('disable_format_ft renamed to disable_format_cap')
@@ -158,37 +152,22 @@ end
 
 local extend_config = function(opts)
   opts = opts or {}
-  if next(opts) == nil then
-    return
-  end
-  if opts.debug then
-    _NgConfigValues.debug = opts.debug
-  end
+  if next(opts) == nil then return end
+  if opts.debug then _NgConfigValues.debug = opts.debug end
   -- enable logs
   require('navigator.util').setup()
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then
-      warn(
-        string.format(
-          '[] Deprecated? Key %s is not in default setup, it could be incorrect to set to %s',
-          key,
-          vim.inspect(value)
-        )
-      )
+      warn(string.format(
+        '[] Deprecated? Key %s is not in default setup, it could be incorrect to set to %s',
+        key, vim.inspect(value)))
       _NgConfigValues[key] = value
       -- return
     else
       if type(_NgConfigValues[key]) == 'table' then
         if type(value) ~= 'table' then
-          info(
-            string.format(
-              '[] Reset type: Key %s setup value %s type %s , from %s',
-              key,
-              vim.inspect(value),
-              type(value),
-              vim.inspect(_NgConfigValues[key])
-            )
-          )
+          info(string.format('[] Reset type: Key %s setup value %s type %s , from %s', key,
+            vim.inspect(value), type(value), vim.inspect(_NgConfigValues[key])))
         end
         for k, v in pairs(value) do
           if type(k) == 'number' then
@@ -199,9 +178,7 @@ local extend_config = function(opts)
           -- level 3
           if type(_NgConfigValues[key][k]) == 'table' then
             if type(v) == 'table' then
-              for k2, v2 in pairs(v) do
-                _NgConfigValues[key][k][k2] = v2
-              end
+              for k2, v2 in pairs(v) do _NgConfigValues[key][k][k2] = v2 end
             else
               _NgConfigValues[key][k] = v
             end
@@ -254,18 +231,12 @@ M.setup = function(cfg)
 
   cfg.lsp = cfg.lsp or _NgConfigValues.lsp
 
-  if _NgConfigValues.lsp.enable then
-    require('navigator.diagnostics').config(cfg.lsp.diagnostic)
-  end
-  if not _NgConfigValues.loaded then
-    _NgConfigValues.loaded = true
-  end
+  if _NgConfigValues.lsp.enable then require('navigator.diagnostics').config(cfg.lsp.diagnostic) end
+  if not _NgConfigValues.loaded then _NgConfigValues.loaded = true end
 
   if _NgConfigValues.ts_fold == true then
     local ok, _ = pcall(require, 'nvim-treesitter')
-    if ok then
-      require('navigator.foldts').on_attach()
-    end
+    if ok then require('navigator.foldts').on_attach() end
   end
 
   local _start_client = vim.lsp.start_client

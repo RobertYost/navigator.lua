@@ -7,11 +7,11 @@ return {
     if packer_plugins ~= nil then -- packer install
       local lazy_plugins = {
         ['nvim-lspconfig'] = 'neovim/nvim-lspconfig',
-        ['guihua.lua'] = 'ray-x/guihua.lua',
+        ['guihua.lua'] = 'ray-x/guihua.lua'
       }
 
-      if _NgConfigValues.lsp_installer == true then
-        lazy_plugins['nvim-lsp-installer'] = 'williamboman/nvim-lsp-installer'
+      if _NgConfigValues.mason_lsp == true then
+        lazy_plugins['mason.nvim'] = 'williamboman/mason.nvim'
       end
 
       -- packer installed
@@ -29,14 +29,14 @@ return {
       end
     end
 
-    if _NgConfigValues.lsp_installer == true then
-      vim.cmd('packadd nvim-lsp-installer')
-      local has_lspinst, lspinst = pcall(require, 'nvim-lsp-installer')
-      log('lsp_installer installed', has_lspinst)
+    if _NgConfigValues.mason_lsp == true then
+      vim.cmd('packadd mason.nvim')
+      local has_lspinst, lspinst = pcall(require, 'mason')
+      log('mason.nvim installed', has_lspinst)
       if has_lspinst then
         lspinst.setup()
         local configs = require('lspconfig/configs')
-        local servers = require('nvim-lsp-installer').get_installed_servers()
+        local servers = require('mason').get_installed_packages()
         for _, server in pairs(servers) do
           local cfg = require('navigator.lspclient.clients').get_cfg(server)
           local lsp_inst_cfg = configs[server]
@@ -64,5 +64,5 @@ return {
         end
       end
     end
-  end,
+  end
 }

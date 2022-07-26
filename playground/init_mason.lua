@@ -3,9 +3,7 @@ vim.cmd([[set packpath=/tmp/nvim/site]])
 
 local package_root = '/tmp/nvim/site/pack'
 local install_path = package_root .. '/packer/start/packer.nvim'
-vim.g.coq_settings = {
-  ['auto_start'] = 'shut-up',
-}
+vim.g.coq_settings = {['auto_start'] = 'shut-up'}
 
 local function load_plugins()
   require('packer').startup({
@@ -13,21 +11,21 @@ local function load_plugins()
       use('wbthomason/packer.nvim')
       use('neovim/nvim-lspconfig')
       use({
-        'williamboman/nvim-lsp-installer',
+        'williamboman/mason.nvim',
         config = function()
-          local lsp_installer = require('nvim-lsp-installer')
-          lsp_installer.setup{}
-        end,
+          local mason = require('mason')
+          mason.setup {}
+        end
       })
       use({
         'ray-x/navigator.lua',
         config = function()
           require('navigator').setup({
             debug = true,
-            lsp_installer = true,
-            keymaps = { { key = 'gR', func = "require('navigator.reference').async_ref()" } },
+            mason_lsp = true,
+            keymaps = {{key = 'gR', func = "require('navigator.reference').async_ref()"}}
           })
-        end,
+        end
       })
       use('ray-x/guihua.lua')
       -- -- COQ (Autocompletion)
@@ -38,20 +36,15 @@ local function load_plugins()
     end,
     config = {
       package_root = package_root,
-      compile_path = install_path .. '/plugin/packer_compiled.lua',
-    },
+      compile_path = install_path .. '/plugin/packer_compiled.lua'
+    }
   })
   -- navigator/LSP setup
 end
 
 if vim.fn.isdirectory(install_path) == 0 then
   print('install packer')
-  vim.fn.system({
-    'git',
-    'clone',
-    'https://github.com/wbthomason/packer.nvim',
-    install_path,
-  })
+  vim.fn.system({'git', 'clone', 'https://github.com/wbthomason/packer.nvim', install_path})
   load_plugins()
   require('packer').sync()
   vim.cmd('colorscheme aurora')
