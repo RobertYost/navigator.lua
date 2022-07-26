@@ -1,4 +1,5 @@
 # Navigator
+
 - Source code analysis and navigate tool
 
 - Easy code navigation, view diagnostic errors, see relationships of functions, variables
@@ -72,7 +73,7 @@ variable is:
 
 - Async request with lsp.buf_request for reference search
 
-- Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?). Also as LSP trying to hide details behind, Treesitter allows you to access all AST  semantics.
+- Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?). Also as LSP trying to hide details behind, Treesitter allows you to access all AST semantics.
 
 - FZY search with either native C (if gcc installed) or Lua-JIT
 
@@ -277,7 +278,7 @@ require'navigator'.setup({
     diagnostic_head_severity_1 = "🈲",
     -- refer to lua/navigator.lua for more icons setups
   },
-  lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
+  mason_lsp = false, -- set to true if you would like use the lsp installed by williamboman/mason.nvim
   lsp = {
     enable = true,   -- skip lsp setup if disabled make sure add require('navigator.lspclient.mapping').setup() in you
     -- own on_attach
@@ -502,24 +503,25 @@ The plugin can be loaded lazily (packer `opt = true` ), And it will check if opt
 
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
-## Integrat with lsp_installer (williamboman/nvim-lsp-installer)
+## Integrate with mason.nvim (williamboman/mason.nvim)
 
-If you are using lsp_installer and would like to use the lsp servers installed by lsp_installer. Please set
+If you are using mason.nvim and would like to use the lsp servers installed by mason.nvim. Please set
 
 ```lua
-lsp_installer = true
+mason_lsp = true
 
 ```
 
 In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
 
 example:
+
 ```lua
       use({
-        'williamboman/nvim-lsp-installer',
+        'williamboman/mason.nvim',
         config = function()
-          local lsp_installer = require('nvim-lsp-installer')
-          lsp_installer.setup{}
+          local mason = require('mason')
+          mason.setup{}
         end,
       })
       use({
@@ -527,7 +529,7 @@ example:
         config = function()
           require('navigator').setup({
             debug = true,
-            lsp_installer = true,
+            mason_lsp = true,
             keymaps = { { key = 'gR', func = "require('navigator.reference').async_ref()" } },
           })
         end,
@@ -535,21 +537,20 @@ example:
 
 ```
 
-Please refer to [lsp_installer_config](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
+Please refer to [mason_config](https://github.com/ray-x/navigator.lua/blob/master/playground/init_mason.lua)
 for more info
 
-
-Alternatively, Navigator can be used to startup the server installed by lsp-installer.
+Alternatively, Navigator can be used to startup the server installed by mason.nvim.
 as it will override the navigator setup
 
-To start LSP installed by lsp_installer, please use following setups
+To start LSP installed by mason.nvim, please use following setups
 
 ```lua
 
 require'navigator'.setup({
-  -- lsp_installer = false -- default value is false
+  -- mason_lsp = false -- default value is false
   lsp = {
-    tsserver = { cmd = {'your tsserver installed by lsp_installer'} }
+    tsserver = { cmd = {'your tsserver installed by mason.nvim'} }
   }
 })
 
@@ -559,7 +560,7 @@ example cmd setup (mac) for pyright :
 
 ```
 require'navigator'.setup({
-  -- lsp_installer = false -- default value is false
+  -- mason_lsp = false -- default value is false
 
   lsp = {
     tsserver = {
@@ -570,10 +571,10 @@ require'navigator'.setup({
 
 ```
 
-The lsp servers installed by nvim-lsp-installer is in following dir
+The lsp servers installed by mason.nvim is in following dir
 
 ```lua
-local path = require 'nvim-lsp-installer.path'
+local path = require 'mason.mason-core.path'
 local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
 
 ```
@@ -583,11 +584,11 @@ And you can setup binary full path to this: (e.g. with gopls)
 
 ```lua
 
-local path = require 'nvim-lsp-installer.path'
+local path = require 'mason.mason-core.path'
 local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
 
 require'navigator'.setup({
-  -- lsp_installer = false -- default value is false
+  -- mason_lsp = false -- default value is false
 
   lsp = {
     gopls = {
@@ -598,18 +599,19 @@ require'navigator'.setup({
 
 ```
 
-Use lsp_installer configs
-You can delegate the lsp server setup to lsp_installer with `server:setup{opts}`
-Here is an example [init_lsp_installer.lua](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
-
+Use mason.nvim configs
+You can delegate the lsp server setup to mason.nvim with `server:setup{opts}`
+Here is an example [init_mason.lua](https://github.com/ray-x/navigator.lua/blob/master/playground/init_mason.lua)
 
 ### Integration with other lsp plugins (e.g. rust-tools, go.nvim, clangd extension)
+
 There are lots of plugins provides lsp support
-* go.nvim allow you either hook gopls from go.nvim or from navigator and it can export the lsp setup from go.nvim.
-* rust-tools and clangd allow you to setup on_attach from config server
-* [lua-dev](https://github.com/folke/lua-dev.nvim) Dev setup for init.lua and plugin development. Navigator can
-extend lua setup with lua-dev. 
-Here is an example to setup rust with rust-tools
+
+- go.nvim allow you either hook gopls from go.nvim or from navigator and it can export the lsp setup from go.nvim.
+- rust-tools and clangd allow you to setup on_attach from config server
+- [lua-dev](https://github.com/folke/lua-dev.nvim) Dev setup for init.lua and plugin development. Navigator can
+  extend lua setup with lua-dev.
+  Here is an example to setup rust with rust-tools
 
 ```lua
 require'navigator'.setup({
@@ -638,8 +640,6 @@ require("clangd_extensions").setup {
 }
 
 ```
-
-
 
 ## Usage
 
@@ -676,15 +676,15 @@ You can override the above highlight to fit your current colorscheme
 
 ## commands
 
-| command      | function                  |
-| ------------ | ------------------------- |
-| LspToggleFmt | toggle lsp auto format    |
-| LspKeymaps   | show LSP releated keymaps |
-| Nctags {args}      | show ctags symbols, args: -g regen ctags |
-| LspRestart   | reload lsp |
-| LspToggleFmt   | toggle lsp format |
-| LspSymbols   | document symbol in side panel |
-| TSymobls   | treesitter symbol in side panel |
+| command         | function                                                                  |
+| --------------- | ------------------------------------------------------------------------- |
+| LspToggleFmt    | toggle lsp auto format                                                    |
+| LspKeymaps      | show LSP releated keymaps                                                 |
+| Nctags {args}   | show ctags symbols, args: -g regen ctags                                  |
+| LspRestart      | reload lsp                                                                |
+| LspToggleFmt    | toggle lsp format                                                         |
+| LspSymbols      | document symbol in side panel                                             |
+| TSymobls        | treesitter symbol in side panel                                           |
 | Calltree {args} | lsp call hierarchy call tree, args: -i (incomming default), -o (outgoing) |
 
 ## Screenshots
@@ -702,6 +702,7 @@ Using treesitter and LSP to view the symbol definition
 ![image](https://user-images.githubusercontent.com/1681295/139771978-bbc970a5-be9f-42cf-8942-3477485bd89c.png)
 
 ### Sidebar, folding, outline
+
 Treesitter outline and Diagnostics
 <img width="708" alt="image" src="https://user-images.githubusercontent.com/1681295/174791609-0023e68f-f1f4-4335-9ea2-d2360e9f0bfd.png">
 <img width="733" alt="image" src="https://user-images.githubusercontent.com/1681295/174804579-26f87fbf-426b-46d0-a7a3-a5aab69c032f.png">
@@ -830,6 +831,7 @@ Folding is using a hacked version of treesitter folding.
 ![image](https://user-images.githubusercontent.com/1681295/148491596-6cd6c507-c157-4536-b8c4-dc969436763a.png)
 
 #### folding comments
+
 Multiline comments can be folded as it is treated as a block
 
 ![image](https://user-images.githubusercontent.com/1681295/148491845-5ffb18ea-f05d-4229-aec3-aa635b3de814.png)

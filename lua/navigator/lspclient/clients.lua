@@ -19,30 +19,15 @@ if not has_lsp then
   return {
     setup = function()
       vim.notify('loading lsp config failed LSP may not working correctly', vim.lsp.log_levels.WARN)
-    end,
+    end
   }
 end
 
 local util = lspconfig.util
 local config = require('navigator').config_values()
 local disabled_ft = {
-  'NvimTree',
-  'guihua',
-  'clap_input',
-  'clap_spinner',
-  'vista',
-  'vista_kind',
-  'TelescopePrompt',
-  'guihua_rust',
-  'csv',
-  'txt',
-  'defx',
-  'packer',
-  'gitcommit',
-  'windline',
-  'notify',
-  'nofile',
-  '',
+  'NvimTree', 'guihua', 'clap_input', 'clap_spinner', 'vista', 'vista_kind', 'TelescopePrompt',
+  'guihua_rust', 'csv', 'txt', 'defx', 'packer', 'gitcommit', 'windline', 'notify', 'nofile', ''
 }
 -- local cap = vim.lsp.protocol.make_client_capabilities()
 local on_attach = require('navigator.lspclient.attach').on_attach
@@ -55,34 +40,28 @@ local luadevcfg = {
   library = {
     vimruntime = true, -- runtime path
     types = true, -- full signature, docs and completion of vim.api, vim.treesitter, vim.lsp and others
-    plugins = { 'nvim-treesitter', 'plenary.nvim' },
+    plugins = {'nvim-treesitter', 'plenary.nvim'}
   },
   lspconfig = {
     -- cmd = {sumneko_binary},
-    on_attach = on_attach,
-  },
+    on_attach = on_attach
+  }
 }
 
 local luadev = {}
 local user_luadev = _NgConfigValues.lsp['lua-dev']
-if user_luadev then
-  luadev = vim.tbl_deep_extend('force', luadev, user_luadev)
-end
+if user_luadev then luadev = vim.tbl_deep_extend('force', luadev, user_luadev) end
 require('navigator.lazyloader').load('lua-dev.nvim', 'folke/lua-dev.nvim')
-if _NgConfigValues.lsp_installer then
-  require('navigator.lazyloader').load('nvim-lsp-installer', 'williamboman/nvim-lsp-installer')
+if _NgConfigValues.mason_lsp then
+  require('navigator.lazyloader').load('mason', 'williamboman/mason.nvim')
 end
 local ok, l = pcall(require, 'lua-dev')
-if ok and l then
-  luadev = l.setup(luadevcfg)
-end
+if ok and l then luadev = l.setup(luadevcfg) end
 
 local function add(lib)
   for _, p in pairs(vfn.expand(lib, false, true)) do
     p = vim.loop.fs_realpath(p)
-    if p then
-      library[p] = true
-    end
+    if p then library[p] = true end
   end
 end
 
@@ -109,13 +88,9 @@ local path_sep = require('navigator.util').path_sep()
 local strip_dir_pat = path_sep .. '([^' .. path_sep .. ']+)$'
 local strip_sep_pat = path_sep .. '$'
 local dirname = function(pathname)
-  if not pathname or #pathname == 0 then
-    return
-  end
+  if not pathname or #pathname == 0 then return end
   local result = pathname:gsub(strip_sep_pat, ''):gsub(strip_dir_pat, '')
-  if #result == 0 then
-    return '/'
-  end
+  if #result == 0 then return '/' end
   return result
 end
 -- TODO end
@@ -123,57 +98,52 @@ end
 local setups = {
   clojure_lsp = {
     root_dir = function(fname)
-      return util.root_pattern('deps.edn', 'build.boot', 'project.clj', 'shadow-cljs.edn', 'bb.edn', '.git')(fname)
-          or util.path.dirname(fname)
+      return util.root_pattern('deps.edn', 'build.boot', 'project.clj', 'shadow-cljs.edn', 'bb.edn',
+                               '.git')(fname) or util.path.dirname(fname)
     end,
     on_attach = on_attach,
-    filetypes = { 'clojure', 'edn' },
+    filetypes = {'clojure', 'edn'},
     message_level = vim.lsp.protocol.MessageType.error,
-    cmd = { 'clojure-lsp' },
+    cmd = {'clojure-lsp'}
   },
 
   elixirls = {
     on_attach = on_attach,
-    filetypes = { 'elixir', 'eelixir' },
-    cmd = { 'elixir-ls' },
+    filetypes = {'elixir', 'eelixir'},
+    cmd = {'elixir-ls'},
     message_level = vim.lsp.protocol.MessageType.error,
-    settings = {
-      elixirLS = {
-        dialyzerEnabled = true,
-        fetchDeps = false,
-      },
-    },
+    settings = {elixirLS = {dialyzerEnabled = true, fetchDeps = false}},
     root_dir = function(fname)
       return util.root_pattern('mix.exs', '.git')(fname) or util.path.dirname(fname)
-    end,
+    end
   },
 
   gopls = {
     on_attach = on_attach,
     -- capabilities = cap,
-    filetypes = { 'go', 'gomod', 'gohtmltmpl', 'gotexttmpl' },
+    filetypes = {'go', 'gomod', 'gohtmltmpl', 'gotexttmpl'},
     message_level = vim.lsp.protocol.MessageType.Error,
     cmd = {
       'gopls', -- share the gopls instance if there is one already
       '-remote=auto', --[[ debug options ]] --
       -- "-logfile=auto",
       -- "-debug=:0",
-      '-remote.debug=:0',
+      '-remote.debug=:0'
       -- "-rpc.trace",
     },
 
-    flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
+    flags = {allow_incremental_sync = true, debounce_text_changes = 1000},
     settings = {
       gopls = {
         -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
         -- flags = {allow_incremental_sync = true, debounce_text_changes = 500},
         -- not supported
-        analyses = { unusedparams = true, unreachable = false },
+        analyses = {unusedparams = true, unreachable = false},
         codelenses = {
           generate = true, -- show the `go generate` lens.
           gc_details = true, --  // Show a code lens toggling the display of gc's choices.
           test = true,
-          tidy = true,
+          tidy = true
         },
         usePlaceholders = true,
         completeUnimported = true,
@@ -183,58 +153,56 @@ local setups = {
         experimentalWatchedFileDelay = '1000ms',
         symbolMatcher = 'fuzzy',
         gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
-        buildFlags = { '-tags', 'integration' },
+        buildFlags = {'-tags', 'integration'}
         -- buildFlags = {"-tags", "functional"}
-      },
+      }
     },
     root_dir = function(fname)
       return util.root_pattern('go.mod', '.git')(fname) or dirname(fname) -- util.path.dirname(fname)
-    end,
+    end
   },
   clangd = {
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
     cmd = {
-      'clangd',
-      '--background-index',
-      '--suggest-missing-includes',
-      '--clang-tidy',
-      '--header-insertion=iwyu',
-      '--clang-tidy-checks=-*,llvm-*,clang-analyzer-*',
-      '--cross-file-rename',
+      'clangd', '--background-index', '--suggest-missing-includes', '--clang-tidy',
+      '--header-insertion=iwyu', '--clang-tidy-checks=-*,llvm-*,clang-analyzer-*',
+      '--cross-file-rename'
     },
-    filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
+    filetypes = {'c', 'cpp', 'objc', 'objcpp'},
     on_attach = function(client, bufnr)
-      client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
-          or true
+      client.server_capabilities.documentFormattingProvider =
+          client.server_capabilities.documentFormattingProvider or true
       on_attach(client, bufnr)
-    end,
+    end
   },
   rust_analyzer = {
     root_dir = function(fname)
-      return util.root_pattern('Cargo.toml', 'rust-project.json', '.git')(fname) or util.path.dirname(fname)
+      return util.root_pattern('Cargo.toml', 'rust-project.json', '.git')(fname)
+                 or util.path.dirname(fname)
     end,
-    filetypes = { 'rust' },
+    filetypes = {'rust'},
     message_level = vim.lsp.protocol.MessageType.error,
     on_attach = on_attach,
     settings = {
       ['rust-analyzer'] = {
-        assist = { importMergeBehavior = 'last', importPrefix = 'by_self' },
-        cargo = { loadOutDirsFromCheck = true },
-        procMacro = { enable = true },
-      },
+        assist = {importMergeBehavior = 'last', importPrefix = 'by_self'},
+        cargo = {loadOutDirsFromCheck = true},
+        procMacro = {enable = true}
+      }
     },
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500}
   },
   sqls = {
-    filetypes = { 'sql' },
+    filetypes = {'sql'},
     on_attach = function(client, _)
-      client.server_capabilities.executeCommandProvider = client.server_capabilities.documentFormattingProvider or true
+      client.server_capabilities.executeCommandProvider =
+          client.server_capabilities.documentFormattingProvider or true
       highlight.diagnositc_config_sign()
-      require('sqls').setup({ picker = 'telescope' }) -- or default
+      require('sqls').setup({picker = 'telescope'}) -- or default
     end,
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
     settings = {
-      cmd = { 'sqls', '-config', '$HOME/.config/sqls/config.yml' },
+      cmd = {'sqls', '-config', '$HOME/.config/sqls/config.yml'}
       -- alterantively:
       -- connections = {
       --   {
@@ -242,155 +210,109 @@ local setups = {
       --     datasourcename = 'host=127.0.0.1 port=5432 user=postgres password=password dbname=user_db sslmode=disable',
       --   },
       -- },
-    },
+    }
   },
   sumneko_lua = {
-    cmd = { 'lua-language-server' },
-    filetypes = { 'lua' },
+    cmd = {'lua-language-server'},
+    filetypes = {'lua'},
     on_attach = on_attach,
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
     settings = {
       Lua = {
         runtime = {
           -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-          version = 'LuaJIT',
+          version = 'LuaJIT'
         },
         diagnostics = {
           enable = true,
           -- Get the language server to recognize the `vim` global
-          globals = { 'vim', 'describe', 'it', 'before_each', 'after_each', 'teardown', 'pending' },
+          globals = {'vim', 'describe', 'it', 'before_each', 'after_each', 'teardown', 'pending'}
         },
-        completion = { callSnippet = 'Both' },
+        completion = {callSnippet = 'Both'},
         workspace = {
           -- Make the server aware of Neovim runtime files
           library = library,
           maxPreload = 2000,
-          preloadFileSize = 40000,
+          preloadFileSize = 40000
         },
-        telemetry = { enable = false },
-      },
+        telemetry = {enable = false}
+      }
     },
     on_new_config = function(cfg, root)
       local libs = vim.tbl_deep_extend('force', {}, library)
       libs[root] = nil
       cfg.settings.Lua.workspace.library = libs
       return cfg
-    end,
+    end
   },
   pyright = {
     on_attach = on_attach,
-    cmd = { 'pyright-langserver', '--stdio' },
-    filetypes = { 'python' },
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    cmd = {'pyright-langserver', '--stdio'},
+    filetypes = {'python'},
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
     settings = {
       python = {
-        formatting = { provider = 'black' },
+        formatting = {provider = 'black'},
         analysis = {
           autoSearchPaths = true,
           useLibraryCodeForTypes = true,
-          diagnosticMode = 'workspace',
-        },
-      },
-    },
+          diagnosticMode = 'workspace'
+        }
+      }
+    }
   },
   ccls = {
     on_attach = on_attach,
     init_options = {
       compilationDatabaseDirectory = 'build',
       root_dir = [[ util.root_pattern("compile_commands.json", "compile_flags.txt", "CMakeLists.txt", "Makefile", ".git") or util.path.dirname ]],
-      index = { threads = 2 },
-      clang = { excludeArgs = { '-frounding-math' } },
+      index = {threads = 2},
+      clang = {excludeArgs = {'-frounding-math'}}
     },
-    flags = { allow_incremental_sync = true },
+    flags = {allow_incremental_sync = true}
   },
   jdtls = {
     settings = {
-      java = { signatureHelp = { enabled = true }, contentProvider = { preferred = 'fernflower' } },
-    },
+      java = {signatureHelp = {enabled = true}, contentProvider = {preferred = 'fernflower'}}
+    }
   },
-  omnisharp = {
-    cmd = { 'omnisharp', '--languageserver', '--hostPID', tostring(vfn.getpid()) },
-  },
-  terraformls = {
-    filetypes = { 'terraform', 'tf' },
-  },
+  omnisharp = {cmd = {'omnisharp', '--languageserver', '--hostPID', tostring(vfn.getpid())}},
+  terraformls = {filetypes = {'terraform', 'tf'}},
 
   sourcekit = {
-    cmd = { 'sourcekit-lsp' },
-    filetypes = { 'swift' }, -- This is recommended if you have separate settings for clangd.
-  },
+    cmd = {'sourcekit-lsp'},
+    filetypes = {'swift'} -- This is recommended if you have separate settings for clangd.
+  }
 }
 
 setups.sumneko_lua = vim.tbl_deep_extend('force', luadev, setups.sumneko_lua)
 
 local servers = {
-  'angularls',
-  'gopls',
-  'tsserver',
-  'flow',
-  'bashls',
-  'dockerls',
-  'julials',
-  'pylsp',
-  'pyright',
-  'jedi_language_server',
-  'jdtls',
-  'sumneko_lua',
-  'vimls',
-  'html',
-  'jsonls',
-  'solargraph',
-  'cssls',
-  'yamlls',
-  'clangd',
-  'ccls',
-  'sqls',
-  'denols',
-  'graphql',
-  'dartls',
-  'dotls',
-  'kotlin_language_server',
-  'nimls',
-  'intelephense',
-  'vuels',
-  'phpactor',
-  'omnisharp',
-  'r_language_server',
-  'rust_analyzer',
-  'terraformls',
-  'svelte',
-  'texlab',
-  'clojure_lsp',
-  'elixirls',
-  'sourcekit',
-  'fsautocomplete',
-  'vls',
-  'hls',
-  'tflint',
-  'terraform_lsp',
+  'angularls', 'gopls', 'tsserver', 'flow', 'bashls', 'dockerls', 'julials', 'pylsp', 'pyright',
+  'jedi_language_server', 'jdtls', 'sumneko_lua', 'vimls', 'html', 'jsonls', 'solargraph', 'cssls',
+  'yamlls', 'clangd', 'ccls', 'sqls', 'denols', 'graphql', 'dartls', 'dotls',
+  'kotlin_language_server', 'nimls', 'intelephense', 'vuels', 'phpactor', 'omnisharp',
+  'r_language_server', 'rust_analyzer', 'terraformls', 'svelte', 'texlab', 'clojure_lsp',
+  'elixirls', 'sourcekit', 'fsautocomplete', 'vls', 'hls', 'tflint', 'terraform_lsp'
 }
 
-local lsp_installer_servers = {}
+local mason_lsp_servers = {}
 local has_lspinst = false
 
-if config.lsp_installer == true then
-  has_lspinst, _ = pcall(require, 'nvim-lsp-installer')
+if config.mason_lsp == true then
+  has_lspinst, _ = pcall(require, 'mason.nvim')
   if has_lspinst then
-    local srvs = require('nvim-lsp-installer.servers').get_installed_servers()
-    log('lsp_installered servers', srvs)
-    if #srvs > 0 then
-      lsp_installer_servers = srvs
-    end
+    local srvs = require('mason.mason-registry').get_installed_packages()
+    log('mason.nvim lsp servers', srvs)
+    if #srvs > 0 then mason_lsp_servers = srvs end
   end
-  log(lsp_installer_servers)
+  log(mason_lsp_servers)
 end
-if config.lsp.disable_lsp == 'all' then
-  config.lsp.disable_lsp = servers
-end
+if config.lsp.disable_lsp == 'all' then config.lsp.disable_lsp = servers end
 
 local ng_default_cfg = {
   on_attach = on_attach,
-  flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
+  flags = {allow_incremental_sync = true, debounce_text_changes = 1000}
 }
 
 -- check and load based on file type
@@ -410,23 +332,15 @@ local function load_cfg(ft, client, cfg, loaded, starting)
 
   local should_load = false
   if lspft ~= nil and #lspft > 0 then
-    for _, value in ipairs(lspft) do
-      if ft == value then
-        should_load = true
-      end
-    end
-    if should_load == false then
-      return
-    end
+    for _, value in ipairs(lspft) do if ft == value then should_load = true end end
+    if should_load == false then return end
 
     trace('lsp for client', client, cfg)
     if cmd == nil or #cmd == 0 or vfn.executable(cmd[1]) == 0 then
       log('lsp not installed for client', client, cmd)
       return
     end
-    if _NG_Loaded == nil then
-      return log('_NG_Loaded not set')
-    end
+    if _NG_Loaded == nil then return log('_NG_Loaded not set') end
 
     for k, c in pairs(loaded) do
       if client == k then
@@ -436,7 +350,7 @@ local function load_cfg(ft, client, cfg, loaded, starting)
           log('doautocmd filetype')
           vim.defer_fn(function()
             vim.cmd('doautocmd FileType')
-            _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0 ) + 1
+            _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0) + 1
           end, 100)
           return
         end
@@ -455,9 +369,8 @@ local function load_cfg(ft, client, cfg, loaded, starting)
     if starting and (starting.cnt or 0) > 0 then
       log("lsp start up in progress", starting)
       return vim.defer_fn(function()
-        load_cfg(ft, client, cfg, loaded, { cnt = starting.cnt - 1 })
-      end,
-        200)
+        load_cfg(ft, client, cfg, loaded, {cnt = starting.cnt - 1})
+      end, 200)
     end
 
     if lspconfig[client] == nil then
@@ -478,16 +391,16 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       vim.defer_fn(function()
         log('send filetype event')
         vim.cmd([[doautocmd Filetype]])
-        _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0 )+ 1
+        _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0) + 1
       end, 400)
     else
       log('send filetype event')
       if not _NG_Loaded[bufnr] or _NG_Loaded[bufnr] < 4 then
-          log('doautocmd filetype')
-          vim.defer_fn(function()
-            vim.cmd('doautocmd FileType')
-            _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0 ) + 1
-          end, 100)
+        log('doautocmd filetype')
+        vim.defer_fn(function()
+          vim.cmd('doautocmd FileType')
+          _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0) + 1
+        end, 100)
       end
     end
   end
@@ -499,15 +412,16 @@ local function setup_fmt(client, enabled)
     if enabled == false then
       client.resolved_capabilities.document_formatting = enabled
     else
-      client.resolved_capabilities.document_formatting = client.resolved_capabilities.document_formatting or enabled
+      client.resolved_capabilities.document_formatting =
+          client.resolved_capabilities.document_formatting or enabled
     end
   end
 
   if enabled == false then
     client.server_capabilities.documentFormattingProvider = false
   else
-    client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
-        or enabled
+    client.server_capabilities.documentFormattingProvider =
+        client.server_capabilities.documentFormattingProvider or enabled
   end
 end
 
@@ -520,9 +434,9 @@ local function update_capabilities()
   capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
   capabilities.textDocument.completion.completionItem.deprecatedSupport = true
   capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
-  capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
+  capabilities.textDocument.completion.completionItem.tagSupport = {valueSet = {1}}
   capabilities.textDocument.completion.completionItem.resolveSupport = {
-    properties = { 'documentation', 'detail', 'additionalTextEdits' },
+    properties = {'documentation', 'detail', 'additionalTextEdits'}
   }
   capabilities.workspace.configuration = true
   return capabilities
@@ -538,11 +452,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
   for _, lspclient in ipairs(servers) do
     local clients = vim.lsp.get_active_clients() or {}
-    for _, client in ipairs(clients) do
-      if client ~= nil then
-        loaded[client.name] = client.id
-      end
-    end
+    for _, client in ipairs(clients) do if client ~= nil then loaded[client.name] = client.id end end
     -- check should load lsp
 
     if type(lspclient) == 'table' then
@@ -573,10 +483,9 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     local default_config = {}
     if lspconfig[lspclient] == nil then
-      vim.notify(
-        'lspclient' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
-        vim.lsp.log_levels.WARN
-      )
+      vim.notify('lspclient' .. vim.inspect(lspclient)
+                     .. 'no longer support by lspconfig, please submit an issue',
+                 vim.lsp.log_levels.WARN)
       log('lspclient', lspclient, 'not supported')
       goto continue
     end
@@ -584,7 +493,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if lspconfig[lspclient].document_config and lspconfig[lspclient].document_config.default_config then
       default_config = lspconfig[lspclient].document_config.default_config
     else
-      vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.lsp.log_levels.WARN)
+      vim.notify('missing document config for client: ' .. vim.inspect(lspclient),
+                 vim.lsp.log_levels.WARN)
       goto continue
     end
 
@@ -618,9 +528,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       --   setup_fmt(client, enable_fmt)
       -- end
       if config.combined_attach == 'mine' then
-        if config.on_attach == nil then
-          error('on attach not provided')
-        end
+        if config.on_attach == nil then error('on attach not provided') end
         cfg.on_attach = function(client, bufnr)
           config.on_attach(client, bufnr)
 
@@ -628,7 +536,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
           require('navigator.lspclient.mapping').setup({
             client = client,
             bufnr = bufnr,
-            cap = capabilities,
+            cap = capabilities
           })
         end
       end
@@ -640,7 +548,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
           require('navigator.lspclient.mapping').setup({
             client = client,
             bufnr = bufnr,
-            cap = capabilities,
+            cap = capabilities
           })
         end
       end
@@ -659,17 +567,14 @@ local function lsp_startup(ft, retry, user_lsp_opts)
           require('navigator.lspclient.mapping').setup({
             client = client,
             bufnr = bufnr,
-            cap = capabilities,
+            cap = capabilities
           })
         end
       end
       cfg.on_init = function(client)
         if client and client.config and client.config.settings then
-          client.notify(
-            'workspace/didChangeConfiguration',
-            { settings = client.config.settings },
-            vim.lsp.log_levels.WARN
-          )
+          client.notify('workspace/didChangeConfiguration', {settings = client.config.settings},
+                        vim.lsp.log_levels.WARN)
         end
       end
     else
@@ -682,21 +587,21 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     log('loading', lspclient, 'name', lspconfig[lspclient].name, 'has lspinst', has_lspinst)
     -- start up lsp
-    if has_lspinst and _NgConfigValues.lsp_installer then
-      local installed, installer_cfg = require('nvim-lsp-installer.servers').get_server(lspconfig[lspclient].name)
+    if has_lspinst and _NgConfigValues.mason_lsp then
+      local installed, installer_cfg = require('mason.mason-registry').get_package(
+                                           lspconfig[lspclient].name)
 
       log('lsp installer server config ' .. lspconfig[lspclient].name, installer_cfg)
       if installed and installer_cfg then
-        local paths = installer_cfg:get_default_options().cmd_env and installer_cfg:get_default_options().cmd_env.PATH
+        local paths = installer_cfg:get_default_options().cmd_env
+                          and installer_cfg:get_default_options().cmd_env.PATH
         if not paths then
           -- for some reason lspinstaller does not install the binary, check default PATH
           log('lsp installer does not install the lsp in its path, fallback')
           return load_cfg(ft, lspclient, cfg, loaded)
         end
         paths = vim.split(paths, ':')
-        if vfn.empty(cfg.cmd) == 1 then
-          cfg.cmd = { installer_cfg.name }
-        end
+        if vfn.empty(cfg.cmd) == 1 then cfg.cmd = {installer_cfg.name} end
 
         if vfn.executable(cfg.cmd[1]) == 0 then
           for _, path in ipairs(paths) do
@@ -715,16 +620,13 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     if vfn.executable(cfg.cmd[1]) == 0 then
-      log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)
+      log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd),
+          vim.lsp.log_levels.WARN)
     end
 
-    if _NG_Loaded[lspclient] then
-      log('client loaded ?', lspclient, _NG_Loaded[lspclient])
-    end
+    if _NG_Loaded[lspclient] then log('client loaded ?', lspclient, _NG_Loaded[lspclient]) end
     local starting = {}
-    if _NG_Loaded[lspclient] == true then
-      starting = { cnt = 1 }
-    end
+    if _NG_Loaded[lspclient] == true then starting = {cnt = 1} end
 
     load_cfg(ft, lspclient, cfg, loaded, starting)
     -- load_cfg(ft, lspclient, {}, loaded)
@@ -751,9 +653,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       local cfg = {}
       cfg = vim.tbl_deep_extend('keep', cfg, efm_cfg)
       cfg.on_attach = function(client, bufnr)
-        if efm_cfg.on_attach then
-          efm_cfg.on_attach(client, bufnr)
-        end
+        if efm_cfg.on_attach then efm_cfg.on_attach(client, bufnr) end
         on_attach(client, bufnr)
       end
 
@@ -764,14 +664,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
   end
 
-  if not retry or ft == nil then
-    return
-  end
+  if not retry or ft == nil then return end
 end
 
 -- append lsps to servers
 local function add_servers(lsps)
-  vim.validate({ lsps = { lsps, 't' } })
+  vim.validate({lsps = {lsps, 't'}})
   vim.list_extend(servers, lsps)
 end
 
@@ -787,11 +685,7 @@ local function get_cfg(client)
 end
 
 local function ft_disabled(ft)
-  for i = 1, #disabled_ft do
-    if ft == disabled_ft[i] then
-      return true
-    end
-  end
+  for i = 1, #disabled_ft do if ft == disabled_ft[i] then return true end end
 end
 
 local function setup(user_opts, cnt)
@@ -866,12 +760,10 @@ local function setup(user_opts, cnt)
     if slua and not slua.cmd then
       if slua.sumneko_root_path and slua.sumneko_binary then
         lsp_opts.sumneko_lua.cmd = {
-          slua.sumneko_binary,
-          '-E',
-          slua.sumneko_root_path .. '/main.lua',
+          slua.sumneko_binary, '-E', slua.sumneko_root_path .. '/main.lua'
         }
       else
-        lsp_opts.sumneko_lua.cmd = { 'lua-language-server' }
+        lsp_opts.sumneko_lua.cmd = {'lua-language-server'}
       end
     end
   end
@@ -879,9 +771,7 @@ local function setup(user_opts, cnt)
   lsp_startup(ft, retry, lsp_opts)
 
   --- if code lens enabled
-  if _NgConfigValues.lsp.code_lens_action.enable then
-    require('navigator.codelens').setup()
-  end
+  if _NgConfigValues.lsp.code_lens_action.enable then require('navigator.codelens').setup() end
 
   -- _LoadedFiletypes[ft .. tostring(bufnr)] = true -- may prevent lsp config when reboot lsp
 end
@@ -891,23 +781,21 @@ local function on_filetype()
   local uri = vim.uri_from_bufnr(bufnr)
 
   local ft = vim.bo.filetype
-  if ft == nil then
-    return
-  end
+  if ft == nil then return end
   if uri == 'file://' or uri == 'file:///' then
     log('skip loading for ft ', ft, uri)
     return
   end
 
-  log (_NG_Loaded)
+  log(_NG_Loaded)
   if _NG_Loaded[bufnr] and type(_NG_Loaded[bufnr]) == 'number' and _NG_Loaded[bufnr] > 1 then
     log('navigator was loaded for ft', ft, bufnr)
     return
   end
 
   -- on_filetype should only be trigger only once for each bufnr
-  if _NG_Loaded[bufnr] ~= nil and type(_NG_Loaded[bufnr] == 'number')  then
-    _NG_Loaded[bufnr] = _NG_Loaded[bufnr] + 1   -- do not hook and trigger filetype event multiple times
+  if _NG_Loaded[bufnr] ~= nil and type(_NG_Loaded[bufnr] == 'number') then
+    _NG_Loaded[bufnr] = _NG_Loaded[bufnr] + 1 -- do not hook and trigger filetype event multiple times
   end
   if _NG_Loaded[bufnr] == true then
     _NG_Loaded = 1 -- record the count
@@ -917,10 +805,8 @@ local function on_filetype()
   log(uri)
 
   local wids = vfn.win_findbuf(bufnr)
-  if empty(wids) then
-    log('buf not shown return')
-  end
-  setup({ bufnr = bufnr })
+  if empty(wids) then log('buf not shown return') end
+  setup({bufnr = bufnr})
   _NG_Loaded[bufnr] = 1
 end
 
@@ -931,5 +817,5 @@ return {
   add_servers = add_servers,
   on_filetype = on_filetype,
   disabled_ft = disabled_ft,
-  ft_disabled = ft_disabled,
+  ft_disabled = ft_disabled
 }

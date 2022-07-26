@@ -22,7 +22,7 @@ CONTENTS                                                      *navigator-content
         5.4.4. Default keymaps.........................|navigator-default_keymaps|
         5.4.5. Colors/Highlight:.....................|navigator-colors/highlight:|
     5.5. Dependency.........................................|navigator-dependency|
-    5.6. Integrat with lsp_installer (williamboman/nvim-lsp-installer).|navigator-integrat_with_lsp_installer_(williamboman/nvim-lsp-installer)|
+    5.6. Integrate with mason.nvim (williamboman/mason.nvim).|navigator-integrate_with_mason(williamboman/mason.nvim)|
         5.6.1. Integration with other lsp plugins (e.g. rust-tools, go.nvim, clangd extension).|navigator-integration_with_other_lsp_plugins_(e.g._rust-tools,_go.nvim,_clangd_extension)|
     5.7. Usage...................................................|navigator-usage|
     5.8. Configuration...................................|navigator-configuration|
@@ -288,7 +288,7 @@ Nondefault configuration example:
         diagnostic_head_severity_1 = "🈲",
         -- refer to lua/navigator.lua for more icons setups
       },
-      lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
+      mason_lsp = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
       lsp = {
         enable = true,   -- skip lsp setup if disabled make sure add require('navigator.lspclient.mapping').setup() in you
         -- own on_attach
@@ -503,11 +503,11 @@ The plugin can be loaded lazily (packer `opt = true` ), And it will check if opt
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
 --------------------------------------------------------------------------------
-INTEGRAT WITH LSP_INSTALLER (WILLIAMBOMAN/NVIM-LSP-INSTALLER) *navigator-integrat_with_lsp_installer_(williamboman/nvim-lsp-installer)*
+INTEGRATE WITH MASON.NVIM (WILLIAMBOMAN/MASON.NVIM) *navigator-integrate_with_mason(williamboman/mason.nvim)*
 
-If you are using lsp_installer and would like to use the lsp servers installed by lsp_installer. Please set
+If you are using mason.nvim and would like to use the lsp servers installed by mason.nvim. Please set
 >
-    lsp_installer = true
+    mason_lsp = true
 <
 
 In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
@@ -515,10 +515,10 @@ In the config. Also please setup the lsp server from installer setup with `serve
 example:
 >
           use({
-            'williamboman/nvim-lsp-installer',
+            'williamboman/mason.nvim',
             config = function()
-              local lsp_installer = require('nvim-lsp-installer')
-              lsp_installer.setup{}
+              local mason = require('mason')
+              mason.setup{}
             end,
           })
           use({
@@ -526,25 +526,25 @@ example:
             config = function()
               require('navigator').setup({
                 debug = true,
-                lsp_installer = true,
+                mason_lsp = true,
                 keymaps = { { key = 'gR', func = "require('navigator.reference').async_ref()" } },
               })
             end,
           })
 <
 
-Please refer to lsp_installer_config (https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
+Please refer to mason_config (https://github.com/ray-x/navigator.lua/blob/master/playground/init_mason.lua)
 for more info
 
 Alternatively, Navigator can be used to startup the server installed by lsp-installer.
 as it will override the navigator setup
 
-To start LSP installed by lsp_installer, please use following setups
+To start LSP installed by mason.nvim, please use following setups
 >
     require'navigator'.setup({
-      -- lsp_installer = false -- default value is false
+      -- mason_lsp = false -- default value is false
       lsp = {
-        tsserver = { cmd = {'your tsserver installed by lsp_installer'} }
+        tsserver = { cmd = {'your tsserver installed by mason.nvim'} }
       }
     })
 <
@@ -552,7 +552,7 @@ To start LSP installed by lsp_installer, please use following setups
 example cmd setup (mac) for pyright :
 >
     require'navigator'.setup({
-      -- lsp_installer = false -- default value is false
+      -- mason_lsp = false -- default value is false
       lsp = {
         tsserver = {
           cmd = { "/Users/username/.local/share/nvim/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio" }
@@ -573,7 +573,7 @@ And you can setup binary full path to this: (e.g. with gopls)
     local path = require 'nvim-lsp-installer.path'
     local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
     require'navigator'.setup({
-      -- lsp_installer = false -- default value is false
+      -- mason_lsp = false -- default value is false
       lsp = {
         gopls = {
           cmd = { install_root_dir .. '/go/gopls' }
@@ -582,9 +582,9 @@ And you can setup binary full path to this: (e.g. with gopls)
     }
 <
 
-Use lsp_installer configs
-You can delegate the lsp server setup to lsp_installer with `server:setup{opts}`
-Here is an example init_lsp_installer.lua (https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
+Use mason.nvim configs
+You can delegate the lsp server setup to mason.nvim with `server:setup{opts}`
+Here is an example init_mason.lua (https://github.com/ray-x/navigator.lua/blob/master/playground/init_mason.lua)
 
 INTEGRATION WITH OTHER LSP PLUGINS (E.G. RUST-TOOLS, GO.NVIM, CLANGD EXTENSION) *navigator-integration_with_other_lsp_plugins_(e.g._rust-tools,_go.nvim,_clangd_extension)*
 
